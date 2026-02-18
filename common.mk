@@ -54,13 +54,23 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += frameworks/native/data/etc/android.hardware.wifi.passpoint.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.wifi.passpoint.xml
 
 PRODUCT_PRIVATE_KEY := device/qcom/common/qcom.key
-PRODUCT_PACKAGES += qcril.db
+#PRODUCT_PACKAGES += qcril.db
+
+# Memtrack
+PRODUCT_PACKAGES += \
+    vendor.qti.hardware.memtrack-service
 
 ifneq ($(TARGET_DEFINES_DALVIK_HEAP), true)
 ifneq ($(TARGET_HAS_LOW_RAM), true)
 $(call inherit-product, frameworks/native/build/phone-xhdpi-1024-dalvik-heap.mk)
 endif
 endif
+
+# Define Product Namespaces
+PRODUCT_SOONG_NAMESPACES += \
+    hardware/qcom/display \
+    vendor/qcom/opensource/commonsys/display \
+    vendor/qcom/opensource/commonsys-intf/display
 
 # RFS APQ GNSS symlinks
 PRODUCT_PACKAGES += \

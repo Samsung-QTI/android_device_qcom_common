@@ -366,7 +366,7 @@ ifeq ($(BOARD_SUPPORTS_OPENSOURCE_STHAL),true)
 endif
 
 # Thermal HAL namespace
-PRODUCT_SOONG_NAMESPACES += hardware/qcom/thermal
+PRODUCT_SOONG_NAMESPACES += vendor/qcom/opensource/thermal-hal
 
 # Bootctrl namespace
 PRODUCT_SOONG_NAMESPACES += hardware/qcom/bootctrl

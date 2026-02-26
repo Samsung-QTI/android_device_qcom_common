@@ -147,6 +147,9 @@ SOONG_CONFIG_qtidisplay += \
     headless \
     llvmsa \
     gralloc4 \
+    gralloc_handle_has_reserved_size \
+    gralloc_handle_has_custom_content_md_reserved_size \
+    gralloc_handle_has_ubwcp_format \
     displayconfig_enabled \
     udfps \
     default \
@@ -205,18 +208,18 @@ SOONG_CONFIG_qtidisplay_target_uses_ycrcb_venus_camera_preview ?= false
 # Display Configuration
 # ============================================================================
 # Kernel 4.9+ : DRM PP support
-ifeq ($(shell test $(TARGET_KERNEL_VERSION) -ge 4.9 2>/dev/null && echo true),true)
+ifneq ($(filter 4.9 4.14 4.19 5.4 5.10 5.15 6.1 6.6,$(TARGET_KERNEL_VERSION)),)
     SOONG_CONFIG_qtidisplay_drmpp := true
 endif
 
 # Kernel 4.14+ : Gralloc4 + displayconfig
-ifeq ($(shell test $(TARGET_KERNEL_VERSION) -ge 4.14 2>/dev/null && echo true),true)
+ifneq ($(filter 4.14 4.19 5.4 5.10 5.15 6.1 6.6,$(TARGET_KERNEL_VERSION)),)
     SOONG_CONFIG_qtidisplay_gralloc4 := true
     SOONG_CONFIG_qtidisplay_displayconfig_enabled := true
 endif
 
 # Kernel 6.1+ : SMMU proxy + UBWCP headers
-ifeq ($(shell test $(TARGET_KERNEL_VERSION) -ge 6.1 2>/dev/null && echo true),true)
+ifneq ($(filter 6.1 6.6,$(TARGET_KERNEL_VERSION)),)
     SOONG_CONFIG_qtidisplay_smmu_proxy := true
     SOONG_CONFIG_qtidisplay_ubwcp_headers := true
 endif
@@ -283,7 +286,7 @@ TARGET_ADDITIONAL_GRALLOC_10_USAGE_BITS += | (1 << 13)
 TARGET_ADDITIONAL_GRALLOC_10_USAGE_BITS += | (1 << 21)
 
 # Mark GRALLOC_USAGE_PRIVATE_HEIF_VIDEO as valid gralloc bit (Kernel 4.9+)
-ifeq ($(shell test $(TARGET_KERNEL_VERSION) -ge 4.9 2>/dev/null && echo true),true)
+ifneq ($(filter 4.9 4.14 4.19 5.4 5.10 5.15 6.1 6.6,$(TARGET_KERNEL_VERSION)),)
     TARGET_ADDITIONAL_GRALLOC_10_USAGE_BITS += | (1 << 27)
 endif
 
@@ -291,7 +294,7 @@ endif
 # Gralloc Handle Configuration
 # ============================================================================
 # Kernel 5.10+ : GKI 2.0 gralloc structure
-ifeq ($(shell test $(TARGET_KERNEL_VERSION) -ge 5.10 2>/dev/null && echo true),true)
+ifneq ($(filter 5.10 5.15 6.1 6.6,$(TARGET_KERNEL_VERSION)),)
     TARGET_GRALLOC_HANDLE_HAS_CUSTOM_CONTENT_MD_RESERVED_SIZE ?= true
     TARGET_GRALLOC_HANDLE_HAS_RESERVED_SIZE ?= true
 else
@@ -300,7 +303,7 @@ else
 endif
 
 # Kernel 6.1+ : Full GKI 2.0 including UBWCP format
-ifeq ($(shell test $(TARGET_KERNEL_VERSION) -ge 6.1 2>/dev/null && echo true),true)
+ifneq ($(filter 6.1 6.6,$(TARGET_KERNEL_VERSION)),)
     TARGET_GRALLOC_HANDLE_HAS_UBWCP_FORMAT ?= true
 else
     TARGET_GRALLOC_HANDLE_HAS_UBWCP_FORMAT ?= false
@@ -315,14 +318,14 @@ $(call soong_config_set,qtidisplay,gralloc_handle_has_ubwcp_format,$(TARGET_GRAL
 # Audio HAL Variant Selection
 # ============================================================================
 # Kernel 5.10+ uses AudioReach AHAL
-ifeq ($(shell test $(TARGET_KERNEL_VERSION) -ge 5.10 2>/dev/null && echo true),true)
+ifneq ($(filter 5.10 5.15 6.1 6.6,$(TARGET_KERNEL_VERSION)),)
     TARGET_USES_QCOM_AUDIO_AR ?= true
 else
     TARGET_USES_QCOM_AUDIO_AR ?= false
 endif
 
 # Kernel 5.15+ uses new rmnet driver
-ifeq ($(shell test $(TARGET_KERNEL_VERSION) -ge 5.15 2>/dev/null && echo true),true)
+ifneq ($(filter 5.15 6.1 6.6,$(TARGET_KERNEL_VERSION)),)
     $(call soong_config_set,rmnetctl,old_rmnet_data,false)
 else
     $(call soong_config_set,rmnetctl,old_rmnet_data,true)
@@ -351,12 +354,12 @@ PRODUCT_SOONG_NAMESPACES += vendor/qcom/opensource/dataservices
 # Sound trigger HAL namespace
 ifeq ($(BOARD_SUPPORTS_OPENSOURCE_STHAL),true)
     # Kernel 6.6+ : Latest ST-HAL
-    ifeq ($(shell test $(TARGET_KERNEL_VERSION) -ge 6.6 2>/dev/null && echo true),true)
+    ifneq ($(filter 6.6,$(TARGET_KERNEL_VERSION)),)
         PRODUCT_SOONG_NAMESPACES += vendor/qcom/opensource/audio-hal/st-hal-ar
         $(call soong_config_set,qtiaudio,headers_namespace,hardware/qcom/audio)
         $(call soong_config_set,qtiaudio,libarpal_namespace,hardware/qcom/audio)
     # Kernel 5.10 - 6.1 : Legacy AR ST-HAL
-    else ifeq ($(shell test $(TARGET_KERNEL_VERSION) -ge 5.10 2>/dev/null && echo true),true)
+    else ifneq ($(filter 5.10 5.15 6.1,$(TARGET_KERNEL_VERSION)),)
         PRODUCT_SOONG_NAMESPACES += vendor/qcom/opensource/audio-hal/st-hal-ar-legacy
         $(call soong_config_set,qtiaudio,legacy_headers_namespace,hardware/qcom/audio)
         $(call soong_config_set,qtiaudio,legacy_libarpal_namespace,hardware/qcom/audio)
